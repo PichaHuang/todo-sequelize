@@ -33,6 +33,8 @@ app.get('/todos/:id', (req, res) => {
     .catch(error => console.log(error))
 })
 
+
+// 登入頁
 app.get('/users/login', (req, res) => {
   res.render('login')
 })
@@ -41,16 +43,39 @@ app.post('/users/login', (req, res) => {
   res.send('login')
 })
 
+
+// 註冊頁
 app.get('/users/register', (req, res) => {
   res.render('register')
 })
 
 app.post('/users/register', (req, res) => {
   const { name, email, password, confirmPassword } = req.body
-  User.create({ name, email, password })
-    .then(user => res.redirect('/'))
+  User.findOne({ where: { email } }).then(user => {
+    if (user) {
+      console.log('User already exists')
+      return res.render('register', {
+        name,
+        email,
+        password,
+        confirmPassword
+      })
+    }
+    return bcrypt
+      .genSalt(10)
+      .then(salt => bcrypt.hash(password, salt))
+      .then(hash => User.create({
+        name,
+        email,
+        password: hash
+      }))
+      .then(() => res.redirect('/'))
+      .catch(err => console.log(err))
+  })
 })
 
+
+// 登出
 app.get('/users/logout', (req, res) => {
   res.send('logout')
 })
