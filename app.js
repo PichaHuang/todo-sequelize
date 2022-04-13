@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
 
 
-
+// 首頁
 app.get('/', (req, res) => {
   return Todo.findAll({
     raw: true,
@@ -23,6 +23,14 @@ app.get('/', (req, res) => {
   })
     .then((todos) => { return res.render('index', { todos: todos }) })
     .catch((error) => { return res.status(422).json(error) })
+})
+
+// 詳細頁
+app.get('/todos/:id', (req, res) => {
+  const id = req.params.id
+  return Todo.findByPk(id)
+    .then(todo => res.render('detail', { todo: todo.toJSON() }))
+    .catch(error => console.log(error))
 })
 
 app.get('/users/login', (req, res) => {
